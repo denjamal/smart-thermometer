@@ -38,6 +38,40 @@ void handleNotFound(){
   server.send(404, "text/plain", message);
 }
 
+void GetTemp (){
+  temp  = dht.readTemperature(); 
+  humidity = dht.readHumidity();
+  WebString = "Temperature: " + String((int)temp)+"C \n";
+  WebString += "Humidity: " + String((int)humidity)+"% \n";
+  Serial.println(WebString);
+
+  if(temp > 20 && !isTempHigh) {
+    SendNotificationToSlack();
+    isTempHigh = true;
+  }else if(isTempHigh && temp <= 20){
+    isTempHigh = false;
+  } 
+}
+
+void SendNotificationToSlack(){
+  String notification = "{'text': 'Temperature level is high - " + String((int)temp)+"C \n'}";
+  HTTPClient http;
+  http.begin("https://hooks.slack.com/services/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");      
+  http.addHeader("Content-Type", "application/json");  
+  int httpCode = http.POST(notification);
+  http.end();
+}
+
+void Wifi_Reconect (){
+  WiFi.disconnect();
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("Trying to connect");
+    Serial.print(".");
+  }
+}
+
 void setup(void){
   Serial.begin(115200);
   
@@ -76,32 +110,14 @@ void setup(void){
 }
 
 void loop(void){
-  server.handleClient();
-  delay(2000);
-  GetTemp();
+  if (WiFi.status() != WL_CONNECTED)
+    {
+      Wifi_Reconect();
+    }else {
+      server.handleClient();
+      delay(2000);
+      GetTemp();  
+    }
 }
 
-void GetTemp (){
-  temp  = dht.readTemperature(); 
-  humidity = dht.readHumidity();
-  WebString = "Temperature: " + String((int)temp)+"C \n";
-  WebString += "Humidity: " + String((int)humidity)+"% \n";
-  Serial.println(WebString);
-
-  if(temp > 20 && !isTempHigh) {
-    SendNotificationToSlack();
-    isTempHigh = true;
-  }else if(isTempHigh && temp <= 20){
-    isTempHigh = false;
-  } 
-}
-
-void SendNotificationToSlack(){
-  String notification = "{'text': 'Temperature level is high - " + String((int)temp)+"C \n'}";
-  HTTPClient http;
-  http.begin("https://hooks.slack.com/services/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");      
-  http.addHeader("Content-Type", "application/json");  
-  int httpCode = http.POST(notification);
-  http.end();
-}
 
