@@ -20,7 +20,8 @@ String WebString;
 bool isTempHigh  = false;
 
 void handleRoot() {
-  server.send(200, "text/plain", "hello from esp8266!");
+  GetTemp();
+  server.send(200, "text/plain", WebString);
 }
 
 void handleNotFound(){
@@ -97,14 +98,7 @@ void setup(void){
   }
 
   server.on("/", handleRoot);
-
-  server.on("/inline", [](){
-    GetTemp();
-    server.send(200, "text/plain", WebString);
-  });
-
   server.onNotFound(handleNotFound);
-
   server.begin();
   Serial.println("HTTP server started");
 }
