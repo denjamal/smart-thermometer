@@ -11,6 +11,9 @@
 #define DHTTYPE DHT11     
 DHT dht(DHTPIN, DHTTYPE);
 ESP8266WebServer server(80);
+IPAddress ip(10,0,1,77);
+IPAddress gateway(10, 0, 1, 1);
+IPAddress subnet(255, 255, 255, 0);
 
 const char* ssid = "AirPort Extreme";
 const char* password = "vitaminu123";
@@ -65,6 +68,7 @@ void SendNotificationToSlack(){
 
 void Wifi_Reconect (){
   WiFi.disconnect();
+  WiFi.config(ip, gateway, subnet);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -77,6 +81,7 @@ void setup(void){
   Serial.begin(115200);
   
   dht.begin();
+  WiFi.config(ip, gateway, subnet);
   WiFi.begin(ssid, password);
   
   Serial.println("");
