@@ -8,15 +8,16 @@
 #include <ESP8266HTTPClient.h>
 
 #define DHTPIN 2        
-#define DHTTYPE DHT11     
+#define DHTTYPE DHT11
+#define SLACK_SSL_FINGERPRINT "AC:95:5A:58:B8:4E:0B:CD:B3:97:D2:88:68:F5:CA:C1:0A:81:E3:6E"     
 DHT dht(DHTPIN, DHTTYPE);
 ESP8266WebServer server(80);
-IPAddress ip(10,0,1,77);
-IPAddress gateway(10, 0, 1, 1);
+IPAddress ip(172,27,28,149);
+IPAddress gateway(172, 27, 29, 254);
 IPAddress subnet(255, 255, 255, 0);
 
-const char* ssid = "AirPort Extreme";
-const char* password = "vitaminu123";
+const char* ssid = "clarity-ag";
+const char* password = "zflvbyrj";
 int temp;
 int humidity;
 String WebString;
@@ -60,7 +61,7 @@ void GetTemp (){
 void SendNotificationToSlack(){
   String notification = "{'text': 'Temperature level is high - " + String((int)temp)+"C \n'}";
   HTTPClient http;
-  http.begin("https://hooks.slack.com/services/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");      
+  http.begin("https://hooks.slack.com/services/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", SLACK_SSL_FINGERPRINT);      
   http.addHeader("Content-Type", "application/json");  
   int httpCode = http.POST(notification);
   http.end();
@@ -118,5 +119,3 @@ void loop(void){
       GetTemp();  
     }
 }
-
-
