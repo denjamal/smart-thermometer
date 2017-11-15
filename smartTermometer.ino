@@ -96,7 +96,14 @@ void handleRoot() {
 }
 
 void getTemperature() {
-  GetTemp();
+  WebString = "";
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+  root["temperature"] = (int)temp;
+  root["humidity"] = (int)humidity;
+  root.printTo(WebString);
+  Serial.println(WebString);
+  
   server.send(200, "application/json", WebString);
 }
 
@@ -116,20 +123,13 @@ void handleNotFound(){
 }
 
 void GetTemp (){
-  StaticJsonBuffer<200> jsonBuffer;
-  WebString = "";
   temp  = dht.readTemperature(); 
   humidity = dht.readHumidity();
-  JsonObject& root = jsonBuffer.createObject();
-  root["temperature"] = (int)temp;
-  root["humidity"] = (int)humidity;
-  root.printTo(WebString);
-  Serial.println(WebString);
-
-  if(temp > 20 && !isTempHigh) {
+  
+  if(temp > 25 && !isTempHigh) {
     SendNotificationToSlack();
     isTempHigh = true;
-  }else if(isTempHigh && temp <= 20){
+  }else if(isTempHigh && temp <= 25){
     isTempHigh = false;
   } 
 }
