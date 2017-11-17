@@ -123,8 +123,16 @@ void handleNotFound(){
 }
 
 void GetTemp (){
-  temp  = dht.readTemperature(); 
-  humidity = dht.readHumidity();
+  int temporaryTemperature = dht.readTemperature(); 
+  int temporaryHumidity = dht.readHumidity();
+  
+  if(temporaryTemperature > 200 || temporaryHumidity > 200) {
+    //incorrect data, do nothing
+    return;
+  }
+  
+  temp = temporaryTemperature;
+  humidity = temporaryHumidity;
   
   if(temp > 25 && !isTempHigh) {
     SendNotificationToSlack();
@@ -191,8 +199,8 @@ void loop(void){
     {
       Wifi_Reconect();
     }else {
-      server.handleClient();
       delay(2000);
-      GetTemp();  
+      GetTemp();
+      server.handleClient();
     }
 }
